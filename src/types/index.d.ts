@@ -1,0 +1,12 @@
+declare module "*.png";
+declare module "*.json";
+declare module "*.mp3";
+declare module "*.ogg";
+declare module "*.wav";
+declare module "*.m4a";
+declare module "*.mp4";
+declare module "*.webm";
+declare module "*.svg";
+declare module "*.xml";
+declare module "*.csv";
+declare module "*.ts";
