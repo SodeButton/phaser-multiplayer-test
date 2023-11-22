@@ -10,6 +10,10 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
   },
+  fps: {
+    target: 60,
+    forceSetTimeOut: true,
+  },
   pixelArt: true,
   scene: Scenes,
 };
