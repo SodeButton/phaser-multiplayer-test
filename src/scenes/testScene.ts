@@ -8,6 +8,7 @@ import {
   onDisconnect,
   onValue,
   onChildAdded,
+  onChildRemoved,
   Database,
 } from "firebase/database";
 import { getAuth, signInAnonymously, Auth } from "firebase/auth";
@@ -40,6 +41,19 @@ export default class TestScene extends Phaser.Scene {
     "green",
     "purple",
   ];
+
+  private keyW!: Phaser.Input.Keyboard.Key;
+  private keyA!: Phaser.Input.Keyboard.Key;
+  private keyS!: Phaser.Input.Keyboard.Key;
+  private keyD!: Phaser.Input.Keyboard.Key;
+  private keyLeft!: Phaser.Input.Keyboard.Key;
+  private keyRight!: Phaser.Input.Keyboard.Key;
+  private keyUp!: Phaser.Input.Keyboard.Key;
+  private keyDown!: Phaser.Input.Keyboard.Key;
+
+  private playerID: string = '';
+  private playerGameObject: Character | null = null;
+
   constructor() {
     super("TestScene");
   }
@@ -54,14 +68,53 @@ export default class TestScene extends Phaser.Scene {
   create() {
     this.db = getDatabase(app);
     this.auth = getAuth(app);
+
+
     this.cameras.main.backgroundColor =
       Phaser.Display.Color.HexStringToColor("#5E98FD");
 
+    // 画面の中心にマップを表示
     this.add.image(400, 300, "map").scale = 3;
 
     this.createPlayer();
-
+    this.initInput();
     this.initGame();
+  }
+
+  update(time: number, delta: number) {
+    super.update(time, delta);
+
+    if (!this.playerGameObject) return;
+
+    let dx = 0;
+    let dy = 0;
+
+    if (this.keyW.isDown || this.keyUp.isDown) dy += -1;
+    if (this.keyA.isDown || this.keyLeft.isDown) dx += -1;
+    if (this.keyS.isDown || this.keyDown.isDown) dy += 1;
+    if (this.keyD.isDown || this.keyRight.isDown) dx += 1;
+    this.playerGameObject.move(dx, dy, 1/delta);
+
+    const playerRef = ref(this.db, `players/${this.playerID}`);
+    set(playerRef, {
+      ...this.playerGameObject.playerState,
+      x: this.playerGameObject.x,
+      y: this.playerGameObject.y,
+    }).then();
+  }
+
+  initInput() {
+    if (!this.input.keyboard) return;
+
+    this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+
+    this.keyLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+    this.keyRight = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+    this.keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+    this.keyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
   }
 
   initGame() {
@@ -76,9 +129,27 @@ export default class TestScene extends Phaser.Scene {
         const playerObject = this.playerList.find(
           (p) => p.playerState.id === player.id
         ) as Character;
-        playerObject.x = player.x;
-        playerObject.y = player.y;
+        playerObject.playerState = player;
+        console.log(player);
+        console.log(this.playerList);
+        playerObject.setPosition2D(player.x, player.y);
+        if (this.playerID == playerId) {
+          this.playerGameObject = playerObject;
+        }
       });
+    });
+
+    onChildRemoved(allPlayerRef, (snapshot) => {
+      const removedPlayer = snapshot.val();
+      const removedPlayerObject = this.playerList.find(
+        (p) => p.playerState.id === removedPlayer.id
+      );
+      if (removedPlayerObject) {
+        removedPlayerObject.destroy();
+      }
+      this.playerList = this.playerList.filter(
+        (p) => p.playerState.id !== removedPlayer.id
+      );
     });
 
     onChildAdded(allPlayerRef, (snapshot) => {
@@ -106,6 +177,7 @@ export default class TestScene extends Phaser.Scene {
 
         const name = this.createName();
 
+        // プレイヤーの初期位置を決める
         const exceptionArea = [{x:7, y:1}, {x: 8, y:2}, {}];
         let px = Phaser.Math.Between(1, 13);
         let py = Phaser.Math.Between(1, 7);
@@ -127,12 +199,14 @@ export default class TestScene extends Phaser.Scene {
           coins: 0,
         };
 
+        this.playerID = playerId;
+
         set(playerRef, playerState).then();
 
         // Remove me from Firebase when I disconnect
         onDisconnect(playerRef).remove().then();
       } else {
-        // User is signed out
+        this.playerList.find((p) => p.playerState.id === this.playerID)?.destroy();
       }
     });
 
