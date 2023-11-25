@@ -14,10 +14,13 @@ import {
 import { getAuth, signInAnonymously, Auth } from "firebase/auth";
 
 import Character from "../character.ts";
+import Coin from "../coin.ts";
 
 import imgCharacters from "../assets/characters.png";
 import imgMap from "../assets/map.png";
 import imgShadow from "../assets/shadow.png";
+import imgCoin from "../assets/coin.png";
+import imgCoinShadow from "../assets/coin-shadow.png";
 
 interface PlayerState {
   id: string;
@@ -64,17 +67,20 @@ export default class TestScene extends Phaser.Scene {
     });
     this.load.image("map", imgMap);
     this.load.image("shadow", imgShadow);
+    this.load.image("coin", imgCoin);
+    this.load.image("coin-shadow", imgCoinShadow);
   }
   create() {
     this.db = getDatabase(app);
     this.auth = getAuth(app);
-
 
     this.cameras.main.backgroundColor =
       Phaser.Display.Color.HexStringToColor("#5E98FD");
 
     // 画面の中心にマップを表示
     this.add.image(400, 300, "map").scale = 3;
+
+    new Coin(this, 400, 300);
 
     this.createPlayer();
     this.initInput();
@@ -195,7 +201,7 @@ export default class TestScene extends Phaser.Scene {
           direction: "right",
           color: this.randomFromArray(this.playerColors),
           x: pos.x * 16 * 3 + 64,
-          y: pos.y * 16 * 3 + 206,
+          y: pos.y * 16 * 3 + 196,
           coins: 0,
         };
 

@@ -33,16 +33,33 @@ export default class Character extends Phaser.GameObjects.Container {
     this.character.flipX = this.playerState.direction === "left";
     this.shadow = this.scene.add.image(0, 3, "shadow");
 
-    const namePlateBackGround = this.scene.add.rectangle(0, 0, 48, 8, 0x000000);
-    namePlateBackGround.setAlpha(0.5);
-
-    const nameText = this.scene.add.text(-16, -3, this.playerState.name, {
+    const nameText = this.scene.add.text(0, 0, this.playerState.name, {
       fontSize: "64px",
+      fontFamily: "sans-serif",
+      fontStyle: "bold",
     });
-    nameText.setScale(0.1);
-    this.nameplate = this.scene.add.container(0, -16, [
+    nameText.setScale(0.08);
+    nameText.setPosition(-nameText.displayWidth / 2 - 4, 0);
+    nameText.setOrigin(0, 0.5);
+
+    const coinText = this.scene.add.text(nameText.displayWidth / 2 + 4, 0, this.playerState.coins.toString(), {
+      color: "#FFD700",
+      fontSize: "64px",
+      fontFamily: "sans-serif",
+      fontStyle: "bold",
+    });
+    coinText.setScale(0.08);
+    coinText.setOrigin(1, 0.5);
+
+    const namePlateBackGround = this.scene.add.graphics();
+    namePlateBackGround.fillStyle(0x333333, 0.8);
+    namePlateBackGround.fillRoundedRect(-nameText.displayWidth / 2 - 8, -4, nameText.displayWidth + 16, 8, 3);
+    // namePlateBackGround.setAlpha(0.5);
+
+    this.nameplate = this.scene.add.container(0, -14, [
       namePlateBackGround,
       nameText,
+      coinText,
     ]);
 
     this.scene.add.existing(this.character as Phaser.GameObjects.Image);
