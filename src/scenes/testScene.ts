@@ -99,13 +99,14 @@ export default class TestScene extends Phaser.Scene {
     if (this.keyA.isDown || this.keyLeft.isDown) dx += -1;
     if (this.keyS.isDown || this.keyDown.isDown) dy += 1;
     if (this.keyD.isDown || this.keyRight.isDown) dx += 1;
+
+    if (dx === 0 && dy === 0) return;
+
     this.playerGameObject.move(dx, dy, 1/delta);
 
     const playerRef = ref(this.db, `players/${this.playerID}`);
     set(playerRef, {
       ...this.playerGameObject.playerState,
-      x: this.playerGameObject.x,
-      y: this.playerGameObject.y,
     }).then();
   }
 
@@ -129,15 +130,13 @@ export default class TestScene extends Phaser.Scene {
 
     onValue(allPlayerRef, (snapshot) => {
       //Fires whenever a change occurs.
-      const players = snapshot.val();
+      const players = snapshot.val() || {};
       Object.keys(players).forEach((playerId) => {
         const player = players[playerId];
         const playerObject = this.playerList.find(
           (p) => p.playerState.id === player.id
         ) as Character;
         playerObject.playerState = player;
-        console.log(player);
-        console.log(this.playerList);
         playerObject.setPosition2D(player.x, player.y);
         if (this.playerID == playerId) {
           this.playerGameObject = playerObject;
