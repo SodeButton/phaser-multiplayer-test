@@ -1,2 +1,2 @@
-import TestScene from "./testScene";
+import TestScene from "./TestScene.ts";
 export default [TestScene];
