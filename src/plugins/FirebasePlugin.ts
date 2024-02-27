@@ -24,14 +24,14 @@ import {
 } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyChpOsuTg7f_EsyJqjShzcY8POusMYiPK4",
-  authDomain: "phaser-multiplayer-test.firebaseapp.com",
-  databaseURL: "https://phaser-multiplayer-test-default-rtdb.firebaseio.com",
-  projectId: "phaser-multiplayer-test",
-  storageBucket: "phaser-multiplayer-test.appspot.com",
-  messagingSenderId: "519611176356",
-  appId: "1:519611176356:web:85f5b4f2b5d733e1e95d31",
-  measurementId: "G-LRGW16MJE9",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 export default class FirebasePlugin extends Phaser.Plugins.BasePlugin {

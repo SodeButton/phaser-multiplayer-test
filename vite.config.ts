@@ -5,4 +5,5 @@ export default defineConfig({
     assetsInlineLimit: 0,
   },
   base: "/phaser-multiplayer-test/",
+  envDir: "./",
 });
