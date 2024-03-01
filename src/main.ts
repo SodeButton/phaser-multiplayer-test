@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import Scenes from "./scenes";
 import FirebasePlugin from "./plugins/FirebasePlugin.ts";
+import AssetsPlugin from "./plugins/AssetsPlugin.ts";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -20,6 +21,12 @@ const config: Phaser.Types.Core.GameConfig = {
         plugin: FirebasePlugin,
         start: true,
         mapping: "firebase",
+      },
+      {
+        key: "AssetsPlugin",
+        plugin: AssetsPlugin,
+        start: true,
+        mapping: "assets",
       },
     ],
   },
