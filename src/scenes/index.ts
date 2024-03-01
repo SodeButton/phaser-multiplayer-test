@@ -1,2 +1,4 @@
-import TestScene from "./TestScene.ts";
-export default [TestScene];
+import TitleScene from "./TitleScene.ts";
+import GameScene from "./GameScene.ts";
+
+export default [TitleScene, GameScene];
