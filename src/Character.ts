@@ -9,6 +9,16 @@ interface PlayerState {
   y: number;
   coins: number;
 }
+
+const playerColors: string[] = [
+  "blue",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "purple",
+];
+
 export default class Character extends Phaser.GameObjects.Container {
   public playerState: PlayerState;
   private readonly character: Phaser.GameObjects.Image;
@@ -71,7 +81,6 @@ export default class Character extends Phaser.GameObjects.Container {
   public setPosition2D(x: number, y: number) {
     this.x = x;
     this.y = y;
-    this.character.flipX = this.playerState.direction === "left";
   }
 
   public move(x: number, y: number, deltaTime: number) {
@@ -79,9 +88,20 @@ export default class Character extends Phaser.GameObjects.Container {
     const rad = Math.atan2(y, x);
     this.x += this.speed * Math.cos(rad) * deltaTime;
     this.y += this.speed * Math.sin(rad) * deltaTime;
+    this.playerState.x = this.x;
+    this.playerState.y = this.y;
 
     if (x === 0) return;
     this.character.flipX = (x < 0);
     this.playerState.direction = (x < 0) ? "left" : "right";
+  }
+
+  public updateParameter() {
+    const TextObject = this.nameplate.getAt(1) as Phaser.GameObjects.Text;
+    TextObject.setText(this.playerState.name);
+    this.character.setFrame(
+      playerColors.indexOf(this.playerState.color) * 2 + (this.playerState.direction === "right" ? 1 : 0)
+    );
+    this.setPosition2D(this.playerState.x, this.playerState.y);
   }
 }
