@@ -16,6 +16,14 @@ import {
 } from "firebase/firestore";
 
 import {
+  getDatabase,
+  Database,
+  ref,
+  set,
+  onDisconnect,
+} from "firebase/database";
+
+import {
   getAuth,
   Auth,
   signInAnonymously,
@@ -35,16 +43,18 @@ const firebaseConfig = {
 };
 
 export default class FirebasePlugin extends Phaser.Plugins.BasePlugin {
-  private readonly db: Firestore;
+  private readonly firestore: Firestore;
+  private readonly db: Database;
   private readonly auth: Auth;
 
-  private authStateChangedUnsubscribe: Unsubscribe;
+  private readonly authStateChangedUnsubscribe: Unsubscribe;
   private onLoggedInCallback?: () => void;
 
   constructor(pluginManager: Phaser.Plugins.PluginManager) {
     super(pluginManager);
     const app = initializeApp(firebaseConfig);
-    this.db = getFirestore(app);
+    this.firestore = getFirestore(app);
+    this.db = getDatabase(app);
     this.auth = getAuth(app);
 
     this.authStateChangedUnsubscribe = onAuthStateChanged(this.auth, (user) => {
@@ -63,13 +73,33 @@ export default class FirebasePlugin extends Phaser.Plugins.BasePlugin {
     this.onLoggedInCallback = callback;
   }
 
+  async setUserData(
+    userId: string,
+    data: {
+      id: string;
+      name: string;
+      direction: string;
+      color: string;
+      x: number;
+      y: number;
+      coins: number;
+    }
+  ) {
+    await set(this.getUserRef(userId), data);
+    await onDisconnect(this.getUserRef(userId)).remove();
+  }
+
+  getUserRef(userId: string) {
+    return ref(this.db, `players/${userId}`);
+  }
+
   async saveGameData(userId: string, data: { name: string; score: number }) {
-    await setDoc(doc(this.db, "game-data", userId), data);
+    await setDoc(doc(this.firestore, "game-data", userId), data);
   }
 
   async loadGameData(userId: string) {
     const snap = (await getDoc(
-      doc(this.db, "game-data", userId)
+      doc(this.firestore, "game-data", userId)
     )) as DocumentSnapshot<{ name: string; score: number }>;
     return snap.data();
   }
@@ -84,12 +114,12 @@ export default class FirebasePlugin extends Phaser.Plugins.BasePlugin {
   }
 
   async addHighScore(name: string, score: number) {
-    await addDoc(collection(this.db, "high-scores"), { name, score });
+    await addDoc(collection(this.firestore, "high-scores"), { name, score });
   }
 
   async getHighScores() {
     const q = query(
-      collection(this.db, "high-scores"),
+      collection(this.firestore, "high-scores"),
       orderBy("score", "desc"),
       limit(10)
     );
