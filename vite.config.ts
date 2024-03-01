@@ -6,4 +6,7 @@ export default defineConfig({
   },
   base: "/phaser-multiplayer-test/",
   envDir: "./",
+  server: {
+    port: 5500,
+  },
 });
